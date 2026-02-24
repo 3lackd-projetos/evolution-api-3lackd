@@ -10,6 +10,25 @@ if [[ "$DATABASE_PROVIDER" == "postgresql" || "$DATABASE_PROVIDER" == "mysql" ||
     export DATABASE_URL
     echo "Deploying migrations for $DATABASE_PROVIDER"
     echo "Database URL: $DATABASE_URL"
+
+    # Wait for database to be ready
+    echo "Waiting for database to be ready..."
+    DB_HOST=$(echo "$DATABASE_CONNECTION_URI" | sed -n 's|.*@\([^:]*\):\([0-9]*\).*|\1|p')
+    DB_PORT=$(echo "$DATABASE_CONNECTION_URI" | sed -n 's|.*@\([^:]*\):\([0-9]*\).*|\2|p')
+    MAX_RETRIES=30
+    RETRY_COUNT=0
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null && break
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        echo "Database not ready yet, retrying in 2s... ($RETRY_COUNT/$MAX_RETRIES)"
+        sleep 2
+    done
+
+    if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+        echo "Error: Could not connect to database after $MAX_RETRIES attempts"
+        exit 1
+    fi
+    echo "Database is ready!"
     # rm -rf ./prisma/migrations
     # cp -r ./prisma/$DATABASE_PROVIDER-migrations ./prisma/migrations
     npm run db:deploy
