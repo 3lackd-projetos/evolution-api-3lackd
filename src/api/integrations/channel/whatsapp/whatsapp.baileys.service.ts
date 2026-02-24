@@ -762,7 +762,7 @@ export class BaileysStartupService extends ChannelStartupService {
         .map((chat) => ({
           remoteJid: chat.id,
           instanceId: this.instanceId,
-          name: chat.name,
+          name: chat.name?.substring(0, 100),
           unreadMessages: chat.unreadCount !== undefined ? chat.unreadCount : 0,
         }));
 
@@ -809,8 +809,8 @@ export class BaileysStartupService extends ChannelStartupService {
     'contacts.upsert': async (contacts: Contact[]) => {
       try {
         const contactsRaw: any = contacts.map((contact) => ({
-          remoteJid: contact.id,
-          pushName: contact?.name || contact?.verifiedName || contact.id.split('@')[0],
+          remoteJid: contact.id?.substring(0, 100),
+          pushName: (contact?.name || contact?.verifiedName || contact.id.split('@')[0])?.substring(0, 100),
           profilePicUrl: null,
           instanceId: this.instanceId,
         }));
@@ -845,9 +845,9 @@ export class BaileysStartupService extends ChannelStartupService {
 
         const updatedContacts = await Promise.all(
           contacts.map(async (contact) => ({
-            remoteJid: contact.id,
-            pushName: contact?.name || contact?.verifiedName || contact.id.split('@')[0],
-            profilePicUrl: (await this.profilePicture(contact.id)).profilePictureUrl,
+            remoteJid: contact.id?.substring(0, 100),
+            pushName: (contact?.name || contact?.verifiedName || contact.id.split('@')[0])?.substring(0, 100),
+            profilePicUrl: (await this.profilePicture(contact.id)).profilePictureUrl?.substring(0, 500) || null,
             instanceId: this.instanceId,
           })),
         );
@@ -899,9 +899,9 @@ export class BaileysStartupService extends ChannelStartupService {
       for await (const contact of contacts) {
         this.logger.debug(`Updating contact: ${JSON.stringify(contact, null, 2)}`);
         contactsRaw.push({
-          remoteJid: contact.id,
-          pushName: contact?.name ?? contact?.verifiedName,
-          profilePicUrl: (await this.profilePicture(contact.id)).profilePictureUrl,
+          remoteJid: contact.id?.substring(0, 100),
+          pushName: (contact?.name ?? contact?.verifiedName)?.substring(0, 100),
+          profilePicUrl: (await this.profilePicture(contact.id)).profilePictureUrl?.substring(0, 500) || null,
           instanceId: this.instanceId,
         });
       }
@@ -986,7 +986,7 @@ export class BaileysStartupService extends ChannelStartupService {
             continue;
           }
 
-          chatsRaw.push({ remoteJid: chat.id, instanceId: this.instanceId, name: chat.name });
+          chatsRaw.push({ remoteJid: chat.id, instanceId: this.instanceId, name: chat.name?.substring(0, 100) });
         }
 
         this.sendDataWebhook(Events.CHATS_SET, chatsRaw);
