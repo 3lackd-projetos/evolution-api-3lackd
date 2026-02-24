@@ -57,4 +57,4 @@ ENV DOCKER_ENV=true
 
 EXPOSE 8080
 
-ENTRYPOINT ["/bin/bash", "-c", "echo 'nameserver 8.8.8.8' > /etc/resolv.conf && echo 'nameserver 1.1.1.1' >> /etc/resolv.conf && . ./Docker/scripts/deploy_database.sh && npm run start:prod" ]
+ENTRYPOINT ["/bin/bash", "-c", "echo 'nameserver 8.8.8.8' >> /etc/resolv.conf && echo 'nameserver 1.1.1.1' >> /etc/resolv.conf && . ./Docker/scripts/deploy_database.sh && npm run start:prod" ]
