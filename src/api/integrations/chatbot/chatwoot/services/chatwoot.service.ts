@@ -798,7 +798,7 @@ export class ChatwootService {
             isGroup,
             nameContact,
             picture_url.profilePictureUrl || null,
-            phoneNumber,
+            remoteJid,
           );
         }
 
